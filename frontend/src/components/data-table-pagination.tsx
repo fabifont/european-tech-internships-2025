@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -14,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Route } from "@/routes/jobs";
+import * as React from "react";
 
 interface DataTablePaginationProps {
   pageSize: number;
@@ -34,6 +36,23 @@ export function DataTablePagination({
       search: { page: newPage, limit: newLimit, q },
       replace: true,
     });
+
+  // Local state for the editable page input
+  const [pageInput, setPageInput] = React.useState<string>(String(page));
+
+  // Keep pageInput in sync when external page changes
+  React.useEffect(() => {
+    setPageInput(String(page));
+  }, [page]);
+
+  const commitPageChange = () => {
+    const parsed = Number(pageInput);
+    if (Number.isNaN(parsed) || parsed < 1) {
+      setPageInput(String(page));
+      return;
+    }
+    updateSearch(parsed, limit);
+  };
 
   return (
     <div className="flex flex-col items-center justify-between gap-4 py-4 sm:flex-row">
@@ -64,6 +83,18 @@ export function DataTablePagination({
       <Pagination>
         <PaginationContent>
           <PaginationItem>
+            <PaginationLink
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page !== 1) updateSearch(1, limit);
+              }}
+              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            >
+              First
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
             <PaginationPrevious
               href="#"
               onClick={(e) => {
@@ -73,37 +104,21 @@ export function DataTablePagination({
               className={page === 1 ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
-          {page > 1 && (
-            <PaginationItem>
-              <PaginationLink
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  updateSearch(page - 1, limit);
-                }}
-              >
-                {page - 1}
-              </PaginationLink>
-            </PaginationItem>
-          )}
           <PaginationItem>
-            <PaginationLink href="#" isActive>
-              {page}
-            </PaginationLink>
+            <Input
+              type="number"
+              min={1}
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onBlur={commitPageChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
+              className="h-9 w-12 text-center"
+            />
           </PaginationItem>
-          {hasMore && (
-            <PaginationItem>
-              <PaginationLink
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  updateSearch(page + 1, limit);
-                }}
-              >
-                {page + 1}
-              </PaginationLink>
-            </PaginationItem>
-          )}
           <PaginationItem>
             <PaginationNext
               href="#"
