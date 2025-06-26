@@ -1,4 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -7,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Route } from "@/routes/jobs";
-import React from "react";
+import * as React from "react";
 
 interface DataTablePaginationProps {
   pageSize: number;
@@ -29,15 +37,14 @@ export function DataTablePagination({
       replace: true,
     });
 
-  // Local state for the page‐input field
+  // Local state for the editable page input
   const [pageInput, setPageInput] = React.useState<string>(String(page));
 
-  // Keep local input in sync when `page` changes externally
+  // Keep pageInput in sync when external page changes
   React.useEffect(() => {
     setPageInput(String(page));
   }, [page]);
 
-  // Handle when user commits a new page number
   const commitPageChange = () => {
     const parsed = Number(pageInput);
     if (Number.isNaN(parsed) || parsed < 1) {
@@ -48,7 +55,7 @@ export function DataTablePagination({
   };
 
   return (
-    <div className="flex items-center justify-between py-4">
+    <div className="flex flex-col items-center justify-between gap-4 py-4 sm:flex-row">
       {/* Rows‐per‐page dropdown */}
       <div className="flex items-center space-x-2">
         <span className="text-sm">Rows per page:</span>
@@ -72,40 +79,58 @@ export function DataTablePagination({
         </Select>
       </div>
 
-      {/* Navigation buttons with page number between Prev and Next */}
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => updateSearch(Math.max(1, page - 1), limit)}
-          disabled={page === 1}
-        >
-          ‹ Prev
-        </Button>
-
-        <input
-          type="number"
-          min={1}
-          className="page-input w-12 rounded border px-2 py-1 text-center text-sm"
-          value={pageInput}
-          onChange={(e) => setPageInput(e.target.value)}
-          onBlur={commitPageChange}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.currentTarget.blur();
-            }
-          }}
-        />
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => updateSearch(page + 1, limit)}
-          disabled={!hasMore}
-        >
-          Next ›
-        </Button>
-      </div>
+      {/* Pagination */}
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationLink
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page !== 1) updateSearch(1, limit);
+              }}
+              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            >
+              First
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page > 1) updateSearch(page - 1, limit);
+              }}
+              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <Input
+              type="number"
+              min={1}
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onBlur={commitPageChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
+              className="h-9 w-12 text-center"
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (hasMore) updateSearch(page + 1, limit);
+              }}
+              className={!hasMore ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 }
