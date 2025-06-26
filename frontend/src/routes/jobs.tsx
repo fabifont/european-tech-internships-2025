@@ -5,14 +5,7 @@ import { z } from "zod";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { AdvancedSearchForm } from "@/components/job-advanced-search-form";
 import { JobSearchForm } from "@/components/job-search-form";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
-import { ChevronsUpDown } from "lucide-react";
 
 import { JobTable } from "@/components/job-table";
 import { JobTableSkeleton } from "@/components/job-table-skeleton";
@@ -41,21 +34,31 @@ export type SearchValues = {
 };
 
 function JobsPage() {
-  const { limit, advanced } = Route.useSearch();
+  const search = Route.useSearch();
+  const { limit, advanced } = search;
   const navigate = Route.useNavigate();
 
   // When user searches, reset page back to 1
   const handleSearch = (val: string) =>
     navigate({
       to: ".",
-      search: { page: 1, limit, q: val, advanced: false },
+      search: {
+        ...search,
+        page: 1,
+        q: val,
+        advanced: false,
+        title: [],
+        company: [],
+        location: [],
+        description: [],
+      },
       replace: true,
     });
 
   const handleAdvancedSearch = (val: SearchValues) =>
     navigate({
       to: ".",
-      search: { page: 1, limit, advanced: true, ...val },
+      search: { ...search, page: 1, advanced: true, ...val },
       replace: true,
     });
 
@@ -68,7 +71,14 @@ function JobsPage() {
           onCheckedChange={(checked) =>
             navigate({
               to: ".",
-              search: { ...Route.useSearch(), advanced: checked, page: 1 },
+              search: {
+                ...search,
+                advanced: checked,
+                page: 1,
+                ...(checked
+                  ? {}
+                  : { title: [], company: [], location: [], description: [] }),
+              },
               replace: true,
             })
           }
@@ -87,22 +97,7 @@ function JobsPage() {
       </p>
 
       {advanced ? (
-        <Collapsible>
-          <CollapsibleTrigger asChild>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Button variant="ghost" size="icon" className="size-8">
-                <ChevronsUpDown />
-                <span className="sr-only">Toggle</span>
-              </Button>
-              <span className="text-sm font-semibold text-muted-foreground">
-                Advanced Fields
-              </span>
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-2">
-            <AdvancedSearchForm onSubmit={handleAdvancedSearch} />
-          </CollapsibleContent>
-        </Collapsible>
+        <AdvancedSearchForm onSubmit={handleAdvancedSearch} />
       ) : (
         <JobSearchForm onSubmit={handleSearch} />
       )}
