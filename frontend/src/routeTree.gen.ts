@@ -13,12 +13,40 @@
 import { Route as rootRoute } from "./routes/__root";
 import { Route as LayoutIndexImport } from "./routes/_layout/index";
 import { Route as JobsImport } from "./routes/jobs";
+import { Route as LoginImport } from "./routes/login";
+import { Route as SignupImport } from "./routes/signup";
+import { Route as SettingsImport } from "./routes/settings";
+import { Route as HistoryImport } from "./routes/history";
 
 // Create/Update Routes
 
 const JobsRoute = JobsImport.update({
   id: "/jobs",
   path: "/jobs",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const LoginRoute = LoginImport.update({
+  id: "/login",
+  path: "/login",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const SignupRoute = SignupImport.update({
+  id: "/signup",
+  path: "/signup",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const SettingsRoute = SettingsImport.update({
+  id: "/settings",
+  path: "/settings",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const HistoryRoute = HistoryImport.update({
+  id: "/history",
+  path: "/history",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -39,6 +67,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof JobsImport;
       parentRoute: typeof rootRoute;
     };
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/signup": {
+      id: "/signup";
+      path: "/signup";
+      fullPath: "/signup";
+      preLoaderRoute: typeof SignupImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/history": {
+      id: "/history";
+      path: "/history";
+      fullPath: "/history";
+      preLoaderRoute: typeof HistoryImport;
+      parentRoute: typeof rootRoute;
+    };
     "/_layout/": {
       id: "/_layout/";
       path: "/";
@@ -53,26 +109,45 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/jobs": typeof JobsRoute;
+  "/login": typeof LoginRoute;
+  "/signup": typeof SignupRoute;
+  "/settings": typeof SettingsRoute;
+  "/history": typeof HistoryRoute;
   "/": typeof LayoutIndexRoute;
 }
 
 export interface FileRoutesByTo {
   "/jobs": typeof JobsRoute;
+  "/login": typeof LoginRoute;
+  "/signup": typeof SignupRoute;
+  "/settings": typeof SettingsRoute;
+  "/history": typeof HistoryRoute;
   "/": typeof LayoutIndexRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/jobs": typeof JobsRoute;
+  "/login": typeof LoginRoute;
+  "/signup": typeof SignupRoute;
+  "/settings": typeof SettingsRoute;
+  "/history": typeof HistoryRoute;
   "/_layout/": typeof LayoutIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/jobs" | "/";
+  fullPaths: "/jobs" | "/login" | "/signup" | "/settings" | "/history" | "/";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/jobs" | "/";
-  id: "__root__" | "/jobs" | "/_layout/";
+  to: "/jobs" | "/login" | "/signup" | "/settings" | "/history" | "/";
+  id:
+    | "__root__"
+    | "/jobs"
+    | "/login"
+    | "/signup"
+    | "/settings"
+    | "/history"
+    | "/_layout/";
   fileRoutesById: FileRoutesById;
 }
 
@@ -80,12 +155,20 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute;
   AdvancedRoute: typeof AdvancedRoute;
   LayoutIndexRoute: typeof LayoutIndexRoute;
+  LoginRoute: typeof LoginRoute;
+  SignupRoute: typeof SignupRoute;
+  SettingsRoute: typeof SettingsRoute;
+  HistoryRoute: typeof HistoryRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   AdvancedRoute: AdvancedRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  SettingsRoute: SettingsRoute,
+  HistoryRoute: HistoryRoute,
 };
 
 export const routeTree = rootRoute
@@ -99,11 +182,27 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/jobs",
-        "/_layout/"
+        "/_layout/",
+        "/login",
+        "/signup",
+        "/settings",
+        "/history"
       ]
     },
     "/jobs": {
       "filePath": "jobs.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
+    },
+    "/signup": {
+      "filePath": "signup.tsx"
+    },
+    "/settings": {
+      "filePath": "settings.tsx"
+    },
+    "/history": {
+      "filePath": "history.tsx"
     },
     "/_layout/": {
       "filePath": "_layout/index.tsx"
