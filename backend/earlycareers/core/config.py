@@ -26,6 +26,9 @@ class Settings(BaseSettings):
 
     DB_URI: PostgresDsn
 
+    SECRET_KEY: str = "CHANGE_ME"  # noqa: S105
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
     @computed_field
     @property
     def all_cors_origins(self) -> list[str]:
