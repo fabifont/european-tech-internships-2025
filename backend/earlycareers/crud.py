@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import re
+import uuid  # noqa: TC003
 from typing import TYPE_CHECKING
 
 from sqlmodel import and_, or_, select
 
-from .models import Job
+from earlycareers.core import security
+
+from .models import Job, SearchHistory, User
 
 if TYPE_CHECKING:
     from sqlalchemy.sql.elements import ColumnElement
     from sqlmodel import Session
+
+    from .schemas import UserUpdate
 
 _TOKEN_RE = re.compile(r"\w+")
 _SEARCHABLE = (
@@ -93,4 +98,59 @@ def get_jobs_advanced(
         stmt = stmt.where(and_(*actual_filters))
 
     stmt = stmt.offset((page - 1) * limit).limit(limit)
+    return list(session.exec(stmt).all())
+
+
+def authenticate(*, session: Session, username: str, password: str) -> User | None:
+    user = session.exec(select(User).where(User.username == username)).first()
+    if not user:
+        return None
+    if not security.verify_password(password, user.hashed_password):
+        return None
+    return user
+
+
+def create_user(*, session: Session, user: User) -> User:
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def update_user(*, session: Session, user: User, user_in: UserUpdate) -> User:
+    data = user_in.model_dump(exclude_unset=True)
+    for key, value in data.items():
+        setattr(user, key, value)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def change_password(
+    *, session: Session, user: User, old_password: str, new_password: str
+) -> User:
+    if not security.verify_password(old_password, user.hashed_password):
+        msg = "Invalid password"
+        raise ValueError(msg)
+    user.hashed_password = security.get_password_hash(new_password)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def create_history(*, session: Session, history: SearchHistory) -> SearchHistory:
+    session.add(history)
+    session.commit()
+    session.refresh(history)
+    return history
+
+
+def get_history(*, session: Session, user_id: uuid.UUID) -> list[SearchHistory]:
+    stmt = (
+        select(SearchHistory)
+        .where(SearchHistory.user_id == user_id)
+        .order_by(SearchHistory.created_at.desc())
+    )
     return list(session.exec(stmt).all())
