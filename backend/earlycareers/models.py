@@ -15,3 +15,13 @@ class JobBase(SQLModel):
 
 class Job(JobBase, table=True):
     __tablename__ = "jobs"  # pyright: ignore
+
+
+class SearchSubscription(SQLModel, table=True):
+    __tablename__ = "subscriptions"  # pyright: ignore
+
+    id: int | None = Field(default=None, primary_key=True)
+    email: str = Field(nullable=False, index=True)
+    search_json: str = Field(nullable=False, description="JSON encoded search parameters")
+    unsubscribe_token: str = Field(nullable=False, unique=True, index=True)
+    active: bool = Field(default=True)

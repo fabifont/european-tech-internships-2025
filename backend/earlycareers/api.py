@@ -6,7 +6,11 @@ from fastapi import APIRouter, Query
 
 from earlycareers import crud
 from earlycareers.deps import SessionDep  # noqa: TC001
-from earlycareers.schemas import JobRead
+from earlycareers.schemas import (  # noqa: TC001
+    JobRead,
+    SubscriptionCreate,
+    SubscriptionRead,
+)
 
 if TYPE_CHECKING:
     from earlycareers.models import Job
@@ -50,3 +54,15 @@ def get_jobs_advanced(
         location=location,
         description=description,
     )
+
+
+@router.post("/subscriptions", response_model=SubscriptionRead, tags=["subscriptions"])
+def create_subscription(*, session: SessionDep, body: SubscriptionCreate) -> SubscriptionRead:
+    sub = crud.create_subscription(session=session, email=body.email, params=body.search_params)
+    return SubscriptionRead.model_validate(sub)
+
+
+@router.get("/subscriptions/unsubscribe/{token}", tags=["subscriptions"])
+def unsubscribe(*, session: SessionDep, token: str) -> bool:
+    crud.deactivate_subscription(session=session, token=token)
+    return True

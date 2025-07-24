@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 import re
+import uuid
 from typing import TYPE_CHECKING
 
 from sqlmodel import and_, or_, select
 
-from .models import Job
+from .models import Job, SearchSubscription
 
 if TYPE_CHECKING:
     from sqlalchemy.sql.elements import ColumnElement
@@ -93,4 +95,27 @@ def get_jobs_advanced(
         stmt = stmt.where(and_(*actual_filters))
 
     stmt = stmt.offset((page - 1) * limit).limit(limit)
+    return list(session.exec(stmt).all())
+
+
+def create_subscription(*, session: Session, email: str, params: dict) -> SearchSubscription:
+    token = uuid.uuid4().hex
+    sub = SearchSubscription(email=email, search_json=json.dumps(params), unsubscribe_token=token)
+    session.add(sub)
+    session.commit()
+    session.refresh(sub)
+    return sub
+
+
+def deactivate_subscription(*, session: Session, token: str) -> None:
+    sub = session.exec(select(SearchSubscription).where(SearchSubscription.unsubscribe_token == token)).one_or_none()
+    if sub is None:
+        return
+    sub.active = False
+    session.add(sub)
+    session.commit()
+
+
+def get_active_subscriptions(*, session: Session) -> list[SearchSubscription]:
+    stmt = select(SearchSubscription).where(SearchSubscription.active.is_(True))
     return list(session.exec(stmt).all())

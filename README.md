@@ -27,6 +27,9 @@ Whether you're reporting bugs, enhancing documentation, or improving the code, e
 ## Scraper
 [Check out the scraping library](https://github.com/fabifont/jobpilot)
 
+## Email notifications
+Save your search and receive the first five results every Monday directly in your inbox. Each email includes a link to view all results on the website and an unsubscribe link to stop notifications at any time. The backend automatically sends these summaries every Monday at 08:00 UTC.
+
 ## Internship Positions
 <!-- BEGIN INTERNSHIPS -->
 |company|title|location|link|
